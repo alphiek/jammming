@@ -1,6 +1,8 @@
 let accessToken;
 const clientId = '123d5255f2fc466db2d1f9ec1aead6af';
 const redirectUri = 'http://localhost:3000/';
+let name;
+let trackURIs;
 
 let Spotify = {
   getAccessToken () {
@@ -12,18 +14,20 @@ let Spotify = {
            if (obtainAccessToken && obtainExpiresIn) {
               accessToken = obtainAccessToken[1];
               const expiresIn = Number(obtainExpiresIn[1]);
+              console.log(accessToken);
+              console.log(expiresIn);
               window.setTimeout(() => accessToken = '', expiresIn * 1000);
               window.history.pushState('Access Token', null, '/');
-              return accessToken;
             } else {
               const redirectUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&scope=playlist-modify-public&redirect_uri=${redirectUri}`;
               window.location = redirectUrl;
+              console.log(`redirected`);
             }
           }
         },
 
   search(term) {
-    accessToken = Spotify.getAccessToken()
+    //Spotify.getAccessToken()
     const endpoint = `https://api.spotify.com/v1/search?type=track&q=${term}`;
     return fetch (endpoint,
     {
@@ -38,6 +42,7 @@ let Spotify = {
       if (!jsonResponse.tracks) {
         return [];
       } else {
+        console.log(jsonResponse.tracks)
         return jsonResponse.tracks.items.map(track => {
           return {
             id: track.id,
@@ -53,12 +58,14 @@ let Spotify = {
 
   savePlaylist(playlistName, trackUris) {
     if (!playlistName && !trackUris) {
+      console.log(`no playlist name or track URIs`);
       return;
     } else {
-      accessToken = Spotify.getAccessToken();
       let headers = { headers: {Authorization: `Bearer ${accessToken}`}};
       let userID;
       let endpoint = `https://api.spotify.com/v1/me`;
+      name = playlistName;
+      trackURIs = trackUris;
 
       return fetch (endpoint, headers).then(response => {
         if (response.ok) {
@@ -68,17 +75,22 @@ let Spotify = {
       }, networkError => console.log(networkError.message)
     ).then(jsonResponse => {
         if (!jsonResponse.id) {
+          console.log(`not user ID`);
           return;
         } else {
+          console.log(jsonResponse.id);
           userID = jsonResponse.id;
-          endpoint = `https://api.spotify.com/v1/users/${userID}/playlists`;
-          headers = { headers: {Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json'}};
-          let data = { name: `${playlistName}` };
-          return fetch(endpoint, {
+          let userIdEndpoint = `https://cors-anywhere.herokuapp.com/https://api.spotify.com/v1/users/${userID}/playlists`;
+          let data = JSON.stringify({'name': `${name}`});
+
+          return fetch(userIdEndpoint, {
             method: 'POST',
-            headers,
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-type': 'application/json'
+            },
             body: data
-          }).then(response => {
+        }).then(response => {
             if(response.ok) {
               return response.json();
             }
@@ -86,12 +98,39 @@ let Spotify = {
           }, networkError => console.log(networkError.message)
         ).then(jsonResponse => {
             if (!jsonResponse.id) {
-              window.alert(`not id`)
+              console.log(`not playlist id`);
               return;
             } else {
-              let playlistId = jsonResponse.id;
-              window.alert(playlistId)
-            }
+              console.log(jsonResponse.id);
+              let playlistID = jsonResponse.id;
+              let tracksEndpoint = `https://cors-anywhere.herokuapp.com/https://api.spotify.com/v1/playlists/${playlistID}/tracks`;
+              let trackInfo = JSON.stringify({'uris': `${trackURIs}`});
+
+              return fetch(tracksEndpoint, {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  'Content-type': 'application/json'
+                },
+                body: trackInfo
+              }).then(response => {
+                if(response.ok) {
+                  console.log(response);
+                  return response.json();
+                }
+                throw new Error('Request Failed');
+              }, networkError => console.log(networkError.message)
+            ).then(jsonResponse => {
+              if (!jsonResponse.snapshot_id) {
+                window.alert(`no snapshot id received`)
+                return;
+              } else {
+
+                window.alert(`tracks added`);
+                return;
+              }
+            });
+          }
           });
         }
       });
@@ -99,5 +138,9 @@ let Spotify = {
   }
 };
 
-Spotify.savePlaylist('playlist' , ['erighaeh', 'saghargh']);
+Spotify.getAccessToken();
+//Spotify.savePlaylist('Playlist Test', ['spotify:track:4vnYwFOZCVl0bmerWyuzRw', 'spotify:track:618BQobGgCfEwwAph3vyNe']);
+console.log(name);
+console.log(trackURIs);
+console.log(`statement 2 ${accessToken}`);
 export default Spotify;
