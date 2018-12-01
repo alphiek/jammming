@@ -14,8 +14,6 @@ let Spotify = {
            if (obtainAccessToken && obtainExpiresIn) {
               accessToken = obtainAccessToken[1];
               const expiresIn = Number(obtainExpiresIn[1]);
-              console.log(accessToken);
-              console.log(expiresIn);
               window.setTimeout(() => accessToken = '', expiresIn * 1000);
               window.history.pushState('Access Token', null, '/');
             } else {
@@ -27,7 +25,6 @@ let Spotify = {
         },
 
   search(term) {
-    //Spotify.getAccessToken()
     const endpoint = `https://api.spotify.com/v1/search?type=track&q=${term}`;
     return fetch (endpoint,
     {
@@ -42,7 +39,6 @@ let Spotify = {
       if (!jsonResponse.tracks) {
         return [];
       } else {
-        console.log(jsonResponse.tracks)
         return jsonResponse.tracks.items.map(track => {
           return {
             id: track.id,
@@ -61,11 +57,14 @@ let Spotify = {
       console.log(`no playlist name or track URIs`);
       return;
     } else {
+
+
       let headers = { headers: {Authorization: `Bearer ${accessToken}`}};
       let userID;
-      let endpoint = `https://api.spotify.com/v1/me`;
+      const endpoint = `https://api.spotify.com/v1/me`;
       name = playlistName;
       trackURIs = trackUris;
+
 
       return fetch (endpoint, headers).then(response => {
         if (response.ok) {
@@ -78,10 +77,12 @@ let Spotify = {
           console.log(`not user ID`);
           return;
         } else {
-          console.log(jsonResponse.id);
+
+
           userID = jsonResponse.id;
           let userIdEndpoint = `https://cors-anywhere.herokuapp.com/https://api.spotify.com/v1/users/${userID}/playlists`;
           let data = JSON.stringify({'name': `${name}`});
+
 
           return fetch(userIdEndpoint, {
             method: 'POST',
@@ -101,10 +102,12 @@ let Spotify = {
               console.log(`not playlist id`);
               return;
             } else {
-              console.log(jsonResponse.id);
+
+
               let playlistID = jsonResponse.id;
               let tracksEndpoint = `https://cors-anywhere.herokuapp.com/https://api.spotify.com/v1/playlists/${playlistID}/tracks`;
-              let trackInfo = JSON.stringify({'uris': `${trackURIs}`});
+              let trackInfo = JSON.stringify({ uris: trackURIs });
+
 
               return fetch(tracksEndpoint, {
                 method: 'POST',
@@ -115,19 +118,18 @@ let Spotify = {
                 body: trackInfo
               }).then(response => {
                 if(response.ok) {
-                  console.log(response);
                   return response.json();
                 }
                 throw new Error('Request Failed');
               }, networkError => console.log(networkError.message)
             ).then(jsonResponse => {
               if (!jsonResponse.snapshot_id) {
-                window.alert(`no snapshot id received`)
+                console.log(`no snapshot id received`);
                 return;
               } else {
 
-                window.alert(`tracks added`);
-                return;
+                console.log(`tracks added`);
+                return jsonResponse.snapshot_id;
               }
             });
           }
@@ -139,8 +141,5 @@ let Spotify = {
 };
 
 Spotify.getAccessToken();
-//Spotify.savePlaylist('Playlist Test', ['spotify:track:4vnYwFOZCVl0bmerWyuzRw', 'spotify:track:618BQobGgCfEwwAph3vyNe']);
-console.log(name);
-console.log(trackURIs);
-console.log(`statement 2 ${accessToken}`);
+
 export default Spotify;

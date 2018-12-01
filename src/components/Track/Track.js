@@ -20,12 +20,14 @@ class Track extends Component {
     onClick={this.addTrack}>+</a>;
   }
 
-  addTrack() {
+  addTrack(event) {
     this.props.onAdd(this.props.track);
+    event.preventDefault();
   }
 
-  removeTrack() {
+  removeTrack(event) {
     this.props.onRemove(this.props.track);
+    event.preventDefault();
   }
 
   render() {
