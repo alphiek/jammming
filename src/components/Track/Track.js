@@ -11,7 +11,7 @@ class Track extends Component {
 
   renderAction(isRemoval) {
     if(isRemoval === 'true') {
-      return <a href='www.#.com'
+      return <a href={'www.#.com'}
       className='Track-action'
       onClick={this.removeTrack}>-</a>;
     }
