@@ -28,14 +28,16 @@ class App extends Component {
 
  savePlaylist(event) {
    let trackURIs = this.state.playlistTracks.map(track => track.uri);
-   let response = Spotify.savePlaylist(this.state.playlistName, trackURIs)
+   let response = Spotify.savePlaylist(this.state.playlistName, trackURIs);
    if (response) {
-       this.setState({ playlistTracks: [] })
-       this.setState({ playlistName: 'New Playlist' })
+     this.setState({
+       playlistTracks: [],
+       playlistName: 'New Playlist' })
    }
 
-   event.preventDefault()
+    event.preventDefault()
  }
+
 
  addTrack(track) {
    if (this.state.playlistTracks.find(savedTrack => savedTrack.id === track.id)) {
