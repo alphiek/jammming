@@ -19,6 +19,7 @@ class Playlist extends Component {
     return (
       <div className="Playlist">
         <input placeholder={this.props.playlistName}
+          value={this.props.playlistName}
           onChange={this.handleNameChange}/>
         <TrackList tracks={this.props.playlistTracks}
           onRemove={this.props.onRemove}
