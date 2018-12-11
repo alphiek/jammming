@@ -56,8 +56,10 @@ class App extends Component {
 handlePlaylistReset () {
   setTimeout(() =>
     this.setState({
+     searchResults: [],
      playlistTracks: [],
      playlistName: 'New Playlist',
+     message: 'Your Playlist is Saving',
      loading: false
    }), 2000);
    }
