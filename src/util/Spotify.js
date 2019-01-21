@@ -1,5 +1,5 @@
 let accessToken;
-const clientId = '123d5255f2fc466db2d1f9ec1aead6af';
+const clientId = process.env.REACT_APP_API_KEY_SPOTIFY;
 const redirectUri = 'https://ak-playlistgenerator.surge.sh/';
 let name;
 let trackURIs;
